@@ -18,71 +18,72 @@ import org.asamk.signal.output.JsonWriter;
 import java.io.IOException;
 import java.util.List;
 
-public class RegisterCommand implements RegistrationCommand, JsonRpcRegistrationCommand<RegisterCommand.RegistrationParams> {
+public class RegisterCommand
+		implements RegistrationCommand, JsonRpcRegistrationCommand<RegisterCommand.RegistrationParams> {
 
-    @Override
-    public String getName() {
-        return "register";
-    }
+	@Override
+	public String getName() {
+		return "register";
+	}
 
-    @Override
-    public void attachToSubparser(final Subparser subparser) {
-        subparser.help("Register a phone number with SMS or voice verification.");
-        subparser.addArgument("-v", "--voice")
-                .help("The verification should be done over voice, not SMS.")
-                .action(Arguments.storeTrue());
-        subparser.addArgument("--captcha")
-                .help("The captcha token, required if registration failed with a captcha required error.");
-    }
+	@Override
+	public void attachToSubparser(final Subparser subparser) {
+		subparser.help("Register a phone number with SMS or voice verification.");
+		subparser.addArgument("-v", "--voice").help("The verification should be done over voice, not SMS.")
+				.action(Arguments.storeTrue());
+		subparser.addArgument("--captcha")
+				.help("The captcha token, required if registration failed with a captcha required error.");
+		subparser.addArgument("--ddd").help("Location of DDD config file containing keys.");
+	}
 
-    @Override
-    public void handleCommand(final Namespace ns, final RegistrationManager m) throws CommandException {
-        final boolean voiceVerification = Boolean.TRUE.equals(ns.getBoolean("voice"));
-        final var captcha = ns.getString("captcha");
+	@Override
+	public void handleCommand(final Namespace ns, final RegistrationManager m) throws CommandException {
+		final boolean voiceVerification = Boolean.TRUE.equals(ns.getBoolean("voice"));
+		final var captcha = ns.getString("captcha");
+		final String dddConfig = ns.getString("ddd");
+		register(m, voiceVerification, captcha, dddConfig);
+	}
 
-        register(m, voiceVerification, captcha);
-    }
+	@Override
+	public TypeReference<RegistrationParams> getRequestType() {
+		return new TypeReference<>() {
+		};
+	}
 
-    @Override
-    public TypeReference<RegistrationParams> getRequestType() {
-        return new TypeReference<>() {};
-    }
+	@Override
+	public List<OutputType> getSupportedOutputTypes() {
+		return List.of(OutputType.PLAIN_TEXT, OutputType.JSON);
+	}
 
-    @Override
-    public List<OutputType> getSupportedOutputTypes() {
-        return List.of(OutputType.PLAIN_TEXT, OutputType.JSON);
-    }
+	@Override
+	public void handleCommand(final RegistrationParams request, final RegistrationManager m,
+			final JsonWriter jsonWriter) throws CommandException {
+		register(m, Boolean.TRUE.equals(request.voice()), request.captcha(), null);
+	}
 
-    @Override
-    public void handleCommand(
-            final RegistrationParams request, final RegistrationManager m, final JsonWriter jsonWriter
-    ) throws CommandException {
-        register(m, Boolean.TRUE.equals(request.voice()), request.captcha());
-    }
+	private void register(final RegistrationManager m, final boolean voiceVerification, final String captcha, String dddConfig)
+			throws UserErrorException, IOErrorException {
+		try {
+			m.register(voiceVerification, captcha, dddConfig);
+		} catch (CaptchaRequiredException e) {
+			String message;
+			if (captcha == null) {
+				message = """
+						Captcha required for verification, use --captcha CAPTCHA
+						To get the token, go to https://signalcaptchas.org/registration/generate.html
+						Check the developer tools (F12) console for a failed redirect to signalcaptcha://
+						Everything after signalcaptcha:// is the captcha token.""";
+			} else {
+				message = "Invalid captcha given.";
+			}
+			throw new UserErrorException(message);
+		} catch (NonNormalizedPhoneNumberException e) {
+			throw new UserErrorException("Failed to register: " + e.getMessage(), e);
+		} catch (IOException e) {
+			throw new IOErrorException("Failed to register: " + e.getMessage(), e);
+		}
+	}
 
-    private void register(
-            final RegistrationManager m, final boolean voiceVerification, final String captcha
-    ) throws UserErrorException, IOErrorException {
-        try {
-            m.register(voiceVerification, captcha);
-        } catch (CaptchaRequiredException e) {
-            String message;
-            if (captcha == null) {
-                message = """
-                          Captcha required for verification, use --captcha CAPTCHA
-                          To get the token, go to https://signalcaptchas.org/registration/generate.html
-                          Check the developer tools (F12) console for a failed redirect to signalcaptcha://
-                          Everything after signalcaptcha:// is the captcha token.""";
-            } else {
-                message = "Invalid captcha given.";
-            }
-            throw new UserErrorException(message);
-        } catch (NonNormalizedPhoneNumberException e) {
-            throw new UserErrorException("Failed to register: " + e.getMessage(), e);
-        } catch (IOException e) {
-            throw new IOErrorException("Failed to register: " + e.getMessage(), e);
-        }
-    }
-
-    record RegistrationParams(Boolean voice, String captcha) {}
+	record RegistrationParams(Boolean voice, String captcha) {
+	}
 }

@@ -58,7 +58,7 @@ public class DbusSignalControlImpl implements org.asamk.SignalControl {
                     "Invalid account (phone number), make sure you include the country code.");
         }
         try (final RegistrationManager registrationManager = c.getNewRegistrationManager(number)) {
-            registrationManager.register(voiceVerification, captcha);
+            registrationManager.register(voiceVerification, captcha, null);
         } catch (CaptchaRequiredException e) {
             String message = captcha == null ? "Captcha required for verification." : "Invalid captcha given.";
             throw new SignalControl.Error.RequiresCaptcha(message);

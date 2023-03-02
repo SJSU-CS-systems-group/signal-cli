@@ -10,15 +10,13 @@ import java.io.IOException;
 
 public interface RegistrationManager extends Closeable {
 
-    void register(
-            boolean voiceVerification, String captcha
-    ) throws IOException, CaptchaRequiredException, NonNormalizedPhoneNumberException;
+	void register(boolean voiceVerification, String captcha, String dddConfig)
+			throws IOException, CaptchaRequiredException, NonNormalizedPhoneNumberException;
 
-    void verifyAccount(
-            String verificationCode, String pin
-    ) throws IOException, PinLockedException, IncorrectPinException;
+	void verifyAccount(String verificationCode, String pin)
+			throws IOException, PinLockedException, IncorrectPinException;
 
-    void deleteLocalAccountData() throws IOException;
+	void deleteLocalAccountData() throws IOException;
 
-    boolean isRegistered();
+	boolean isRegistered();
 }
