@@ -259,9 +259,11 @@ public class SignalAccount implements Closeable {
 		getAccountDatabase();
 	}
 
-	private void clearAllPreKeys() {
-		resetPreKeyOffsets(ServiceIdType.ACI);
-		resetPreKeyOffsets(ServiceIdType.PNI);
+	public void clearAllPreKeys() {
+		if (!isDisconnected) {
+			resetPreKeyOffsets(ServiceIdType.ACI);
+			resetPreKeyOffsets(ServiceIdType.PNI);
+		}
 		this.getAciPreKeyStore().removeAllPreKeys();
 		this.getAciSignedPreKeyStore().removeAllSignedPreKeys();
 		this.getPniPreKeyStore().removeAllPreKeys();
@@ -1542,8 +1544,8 @@ public class SignalAccount implements Closeable {
 							.decode(rootNode.get("pniIdentityPrivateKey").asText());
 					pniIdentityKeyPair = KeyUtils.getIdentityKeyPair(publicKeyBytes, privateKeyBytes);
 				}
-				setAciIdentityKeyPair(aciIdentityKeyPair);
-				setPniIdentityKeyPair(pniIdentityKeyPair);
+//				setAciIdentityKeyPair(aciIdentityKeyPair);
+//				setPniIdentityKeyPair(pniIdentityKeyPair);
 
 				// offsets
 				if (rootNode.hasNonNull("preKeyIdOffset")) {

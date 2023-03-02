@@ -103,10 +103,10 @@ class RegistrationManagerImpl implements RegistrationManager {
 		if (account.getAci() != null && attemptReactivateAccount()) {
 			return;
 		}
-
-		NumberVerificationUtils.requestVerificationCode(accountManager, captcha, voiceVerification);
 		if (dddConfig != null)
 			account.dddUpdateIdentityKeys(dddConfig);
+		NumberVerificationUtils.requestVerificationCode(accountManager, captcha, voiceVerification);
+
 	}
 
 	@Override
@@ -128,10 +128,11 @@ class RegistrationManagerImpl implements RegistrationManager {
 
 		ManagerImpl m = null;
 		try {
+			account.clearAllPreKeys();
 			m = new ManagerImpl(account, pathConfig, accountFileUpdater, serviceEnvironmentConfig, userAgent);
 			account = null;
-
 			m.refreshPreKeys();
+
 			if (response.isStorageCapable()) {
 				m.retrieveRemoteStorage();
 			}

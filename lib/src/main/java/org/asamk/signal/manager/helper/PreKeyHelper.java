@@ -84,7 +84,9 @@ public class PreKeyHelper {
 
 	private List<PreKeyRecord> dddGeneratePreKeyRecords(String filePath, ServiceIdType serviceIdType) {
 		List<PreKeyRecord> records = new ArrayList<>();
-
+		
+		// TODO: temp to remove
+		account.dddUpdateIdentityKeys(filePath);
 		if (filePath != null) {
 			System.out.println("DDD Config File Stored at: " + filePath);
 			ObjectMapper mapper = Utils.createStorageObjectMapper();
@@ -98,9 +100,9 @@ public class PreKeyHelper {
 					for (int i = 0; i < preKeysNode.size(); i++) {
 						JsonNode prekey = rootNode.get(preKeysKey).get(i);
 						int id = prekey.get("preKeyId").asInt();
-						final var publicKeyBytes = Base64.getDecoder().decode(rootNode.get("preKeyPublicKey").asText());
+						final var publicKeyBytes = Base64.getDecoder().decode(prekey.get("preKeyPublicKey").asText());
 						final var privateKeyBytes = Base64.getDecoder()
-								.decode(rootNode.get("preKeyPrivateKey").asText());
+								.decode(prekey.get("preKeyPrivateKey").asText());
 
 						final var publicKey = Curve.decodePoint(publicKeyBytes, 0);
 						final var privateKey = Curve.decodePrivatePoint(privateKeyBytes);
@@ -110,6 +112,7 @@ public class PreKeyHelper {
 
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 				System.out.println("Error while handling prekeys from DDD Config");
 			}
 		} else {
