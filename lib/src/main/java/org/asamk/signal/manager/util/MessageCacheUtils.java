@@ -104,7 +104,8 @@ public class MessageCacheUtils {
 
     public static void storeEnvelope(SignalServiceEnvelope envelope, File file) throws IOException {
         try (var f = new FileOutputStream(file)) {
-            try (var out = new DataOutputStream(f)) {
+            try{
+            	var out = new DataOutputStream(f);
                 out.writeInt(CURRENT_VERSION); // version
                 out.writeInt(envelope.getType());
                 out.writeUTF(""); // legacy number
@@ -126,7 +127,9 @@ public class MessageCacheUtils {
                 out.writeBoolean(envelope.isUrgent());
                 out.writeBoolean(envelope.isStory());
                 out.writeUTF(envelope.getUpdatedPni() == null ? "" : envelope.getUpdatedPni());
-            }
+            } catch (Exception e) {
+				System.out.println("Exception occured while storing");
+			}
         }
     }
 }

@@ -17,6 +17,8 @@ import org.signal.libsignal.protocol.state.PreKeyRecord;
 import org.signal.libsignal.protocol.state.SignedPreKeyRecord;
 import org.signal.libsignal.protocol.util.Medium;
 
+import com.fasterxml.jackson.core.exc.StreamWriteException;
+import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -33,6 +35,10 @@ public class DDDKeys {
 	private SignedPreKeyRecord pniSignedPreKey;
 	private List<PreKeyRecord> preKeys;
 	private List<PreKeyRecord> pniPreKeys;
+	
+	// random private keys
+	private IdentityKeyPair randomIdentityKey;
+	private ECKeyPair randomECKey;
 
 	public DDDKeys() {
 		this.preKeyIdOffset = new SecureRandom().nextInt(Medium.MAX_VALUE);
@@ -41,6 +47,8 @@ public class DDDKeys {
 		this.pniNextSignedPreKeyId = new SecureRandom().nextInt(Medium.MAX_VALUE);
 		this.identityKey = generateIdentityKeyPair();
 		this.pniIdentityKey = generateIdentityKeyPair();
+		this.randomIdentityKey = generateIdentityKeyPair();
+		this.randomECKey = Curve.generateKeyPair();
 		this.aciSignedPreKey = generateSignedPreKeyRecord(identityKey, nextSignedPreKeyId);
 		this.pniSignedPreKey = generateSignedPreKeyRecord(pniIdentityKey, pniNextSignedPreKeyId);
 		this.preKeys = generatePreKeyRecords(preKeyIdOffset, 100);
@@ -51,27 +59,32 @@ public class DDDKeys {
 		return Base64.getEncoder().encodeToString(bytes);
 	}
 
-	public void generateJsonAndSaveToFile(String fileName) throws InvalidKeyException, IOException {
+	public void generatePublicKeysJsonFile(String fileName) throws InvalidKeyException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode rootNode = mapper.createObjectNode();
 
 		rootNode.put("identityKey", bytesToString(this.identityKey.getPublicKey().serialize()));
-		rootNode.put("identityPrivateKey", bytesToString(this.identityKey.getPrivateKey().serialize()));
 		rootNode.put("pniIdentityKey", bytesToString(this.pniIdentityKey.getPublicKey().serialize()));
-		rootNode.put("pniIdentityPrivateKey", bytesToString(this.pniIdentityKey.getPrivateKey().serialize()));
 		rootNode.put("preKeyIdOffset", this.preKeyIdOffset);
 		rootNode.put("nextSignedPreKeyId", this.nextSignedPreKeyId);
 		rootNode.put("pniPreKeyIdOffset", this.pniPreKeyIdOffset);
 		rootNode.put("pniNextSignedPreKeyId", this.pniNextSignedPreKeyId);
 
+		// storing random private keys as private keys will remain on the client
+		rootNode.put("identityPrivateKey", bytesToString(this.randomIdentityKey.getPrivateKey().serialize()));
+		rootNode.put("pniIdentityPrivateKey", bytesToString(this.randomIdentityKey.getPrivateKey().serialize()));
+		rootNode.put("aciSignedPreKeyPrivateKey",
+				bytesToString(this.randomIdentityKey.getPrivateKey().serialize()));
+		rootNode.put("pniSignedPreKeyPrivateKey",
+				bytesToString(this.randomIdentityKey.getPrivateKey().serialize()));
+
+		
 		// aci signed prekey
 		rootNode.put("aciSignedPreKeyId", this.aciSignedPreKey.getId());
 		rootNode.put("aciSignedPreKeySignature", bytesToString(this.aciSignedPreKey.getSignature()));
 		rootNode.put("aciSignedPreKeyTimestamp", this.aciSignedPreKey.getTimestamp());
 		rootNode.put("aciSignedPreKeyPublicKey",
 				bytesToString(this.aciSignedPreKey.getKeyPair().getPublicKey().serialize()));
-		rootNode.put("aciSignedPreKeyPrivateKey",
-				bytesToString(this.aciSignedPreKey.getKeyPair().getPrivateKey().serialize()));
 
 		// pni signed prekey
 		rootNode.put("pniSignedPreKeyId", this.pniSignedPreKey.getId());
@@ -79,15 +92,13 @@ public class DDDKeys {
 		rootNode.put("pniSignedPreKeyTimestamp", this.pniSignedPreKey.getTimestamp());
 		rootNode.put("pniSignedPreKeyPublicKey",
 				bytesToString(this.pniSignedPreKey.getKeyPair().getPublicKey().serialize()));
-		rootNode.put("pniSignedPreKeyPrivateKey",
-				bytesToString(this.pniSignedPreKey.getKeyPair().getPrivateKey().serialize()));
 
 		ArrayNode arrayNode = mapper.createArrayNode();
 		for (PreKeyRecord preKey : this.preKeys) {
 			ObjectNode preKeyNode = mapper.createObjectNode();
 			preKeyNode.put("preKeyId", preKey.getId());
 			preKeyNode.put("preKeyPublicKey", bytesToString(preKey.getKeyPair().getPublicKey().serialize()));
-			preKeyNode.put("preKeyPrivateKey", bytesToString(preKey.getKeyPair().getPrivateKey().serialize()));
+			preKeyNode.put("preKeyPrivateKey", bytesToString(this.randomECKey.getPrivateKey().serialize()));
 			arrayNode.add(preKeyNode);
 		}
 		rootNode.putIfAbsent("preKeys", arrayNode);
@@ -97,6 +108,40 @@ public class DDDKeys {
 			ObjectNode preKeyNode = mapper.createObjectNode();
 			preKeyNode.put("preKeyId", preKey.getId());
 			preKeyNode.put("preKeyPublicKey", bytesToString(preKey.getKeyPair().getPublicKey().serialize()));
+			preKeyNode.put("preKeyPrivateKey", bytesToString(this.randomECKey.getPrivateKey().serialize()));
+			arrayNode.add(preKeyNode);
+		}
+		rootNode.putIfAbsent("pniPreKeys", arrayNode);
+		mapper.writerWithDefaultPrettyPrinter().writeValue(new File(fileName), rootNode);
+
+	}
+
+	public void generatePrivateKeysJsonFile(String fileName)
+			throws StreamWriteException, DatabindException, IOException, InvalidKeyException {
+
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode rootNode = mapper.createObjectNode();
+
+		rootNode.put("identityPrivateKey", bytesToString(this.identityKey.getPrivateKey().serialize()));
+		rootNode.put("pniIdentityPrivateKey", bytesToString(this.pniIdentityKey.getPrivateKey().serialize()));
+		rootNode.put("aciSignedPreKeyPrivateKey",
+				bytesToString(this.aciSignedPreKey.getKeyPair().getPrivateKey().serialize()));
+		rootNode.put("pniSignedPreKeyPrivateKey",
+				bytesToString(this.pniSignedPreKey.getKeyPair().getPrivateKey().serialize()));
+
+		ArrayNode arrayNode = mapper.createArrayNode();
+		for (PreKeyRecord preKey : this.preKeys) {
+			ObjectNode preKeyNode = mapper.createObjectNode();
+			preKeyNode.put("preKeyId", preKey.getId());
+			preKeyNode.put("preKeyPrivateKey", bytesToString(preKey.getKeyPair().getPrivateKey().serialize()));
+			arrayNode.add(preKeyNode);
+		}
+		rootNode.putIfAbsent("preKeys", arrayNode);
+
+		arrayNode = mapper.createArrayNode();
+		for (PreKeyRecord preKey : this.pniPreKeys) {
+			ObjectNode preKeyNode = mapper.createObjectNode();
+			preKeyNode.put("preKeyId", preKey.getId());
 			preKeyNode.put("preKeyPrivateKey", bytesToString(preKey.getKeyPair().getPrivateKey().serialize()));
 			arrayNode.add(preKeyNode);
 		}

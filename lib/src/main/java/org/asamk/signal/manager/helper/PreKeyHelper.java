@@ -84,9 +84,7 @@ public class PreKeyHelper {
 
 	private List<PreKeyRecord> dddGeneratePreKeyRecords(String filePath, ServiceIdType serviceIdType) {
 		List<PreKeyRecord> records = new ArrayList<>();
-		
-		// TODO: temp to remove
-		account.dddUpdateIdentityKeys(filePath);
+
 		if (filePath != null) {
 			System.out.println("DDD Config File Stored at: " + filePath);
 			ObjectMapper mapper = Utils.createStorageObjectMapper();
@@ -160,8 +158,7 @@ public class PreKeyHelper {
 				if (serviceIdType == ServiceIdType.PNI) {
 					if (rootNode.hasNonNull("pniSignedPreKeyId") && rootNode.hasNonNull("pniSignedPreKeySignature")
 							&& rootNode.hasNonNull("pniSignedPreKeyTimestamp")
-							&& rootNode.hasNonNull("pniSignedPreKeyPublicKey")
-							&& rootNode.hasNonNull("pniSignedPreKeyPrivateKey")) {
+							&& rootNode.hasNonNull("pniSignedPreKeyPublicKey")) {
 						final var publicKeyBytes = Base64.getDecoder()
 								.decode(rootNode.get("pniSignedPreKeyPublicKey").asText());
 						final var privateKeyBytes = Base64.getDecoder()
@@ -179,8 +176,7 @@ public class PreKeyHelper {
 				} else {
 					if (rootNode.hasNonNull("aciSignedPreKeyId") && rootNode.hasNonNull("aciSignedPreKeySignature")
 							&& rootNode.hasNonNull("aciSignedPreKeyTimestamp")
-							&& rootNode.hasNonNull("aciSignedPreKeyPublicKey")
-							&& rootNode.hasNonNull("aciSignedPreKeyPrivateKey")) {
+							&& rootNode.hasNonNull("aciSignedPreKeyPublicKey")) {
 						final var publicKeyBytes = Base64.getDecoder()
 								.decode(rootNode.get("aciSignedPreKeyPublicKey").asText());
 						final var privateKeyBytes = Base64.getDecoder()

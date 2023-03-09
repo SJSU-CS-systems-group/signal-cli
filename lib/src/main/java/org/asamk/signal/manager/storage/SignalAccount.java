@@ -510,14 +510,20 @@ public class SignalAccount implements Closeable {
 			localPniRegistrationId = KeyHelper.generateRegistrationId(false);
 		}
 		IdentityKeyPair aciIdentityKeyPair = null;
-		if (rootNode.hasNonNull("identityPrivateKey") && rootNode.hasNonNull("identityKey")) {
+		if (rootNode.hasNonNull("identityKey")) {
 			final var publicKeyBytes = Base64.getDecoder().decode(rootNode.get("identityKey").asText());
-			final var privateKeyBytes = Base64.getDecoder().decode(rootNode.get("identityPrivateKey").asText());
+			byte[] privateKeyBytes = null;
+			if (rootNode.hasNonNull("identityPrivateKey")) {
+				privateKeyBytes = Base64.getDecoder().decode(rootNode.get("identityPrivateKey").asText());
+			}
 			aciIdentityKeyPair = KeyUtils.getIdentityKeyPair(publicKeyBytes, privateKeyBytes);
 		}
 		if (rootNode.hasNonNull("pniIdentityPrivateKey") && rootNode.hasNonNull("pniIdentityKey")) {
 			final var publicKeyBytes = Base64.getDecoder().decode(rootNode.get("pniIdentityKey").asText());
-			final var privateKeyBytes = Base64.getDecoder().decode(rootNode.get("pniIdentityPrivateKey").asText());
+			byte[] privateKeyBytes = null;
+			if (rootNode.hasNonNull("pniIdentityPrivateKey")) {
+				privateKeyBytes = Base64.getDecoder().decode(rootNode.get("pniIdentityPrivateKey").asText());
+			}
 			pniIdentityKeyPair = KeyUtils.getIdentityKeyPair(publicKeyBytes, privateKeyBytes);
 		}
 
@@ -1525,28 +1531,24 @@ public class SignalAccount implements Closeable {
 	public void dddUpdateIdentityKeys(String filePath) {
 		dddConfigFile = filePath;
 		isDisconnected = true;
-		IdentityKeyPair aciIdentityKeyPair = null;
-		IdentityKeyPair pniIdentityKeyPair = null;
 		if (filePath != null) {
 			System.out.println("DDD Config File Stored at: " + filePath);
 			ObjectMapper mapper = Utils.createStorageObjectMapper();
 			try {
 				JsonNode rootNode = mapper.readTree(new File(filePath));
 
-				if (rootNode.hasNonNull("identityPrivateKey") && rootNode.hasNonNull("identityKey")) {
+				if (rootNode.hasNonNull("identityKey")) {
 					final var publicKeyBytes = Base64.getDecoder().decode(rootNode.get("identityKey").asText());
 					final var privateKeyBytes = Base64.getDecoder().decode(rootNode.get("identityPrivateKey").asText());
-					aciIdentityKeyPair = KeyUtils.getIdentityKeyPair(publicKeyBytes, privateKeyBytes);
+					this.aciIdentityKeyPair = KeyUtils.getIdentityKeyPair(publicKeyBytes, privateKeyBytes);
 				}
-				if (rootNode.hasNonNull("pniIdentityPrivateKey") && rootNode.hasNonNull("pniIdentityKey")) {
+				if (rootNode.hasNonNull("pniIdentityKey")) {
 					final var publicKeyBytes = Base64.getDecoder().decode(rootNode.get("pniIdentityKey").asText());
 					final var privateKeyBytes = Base64.getDecoder()
 							.decode(rootNode.get("pniIdentityPrivateKey").asText());
-					pniIdentityKeyPair = KeyUtils.getIdentityKeyPair(publicKeyBytes, privateKeyBytes);
+					this.pniIdentityKeyPair = KeyUtils.getIdentityKeyPair(publicKeyBytes, privateKeyBytes);
 				}
-//				setAciIdentityKeyPair(aciIdentityKeyPair);
-//				setPniIdentityKeyPair(pniIdentityKeyPair);
-
+				
 				// offsets
 				if (rootNode.hasNonNull("preKeyIdOffset")) {
 					aciPreKeyIdOffset = rootNode.get("preKeyIdOffset").asInt();

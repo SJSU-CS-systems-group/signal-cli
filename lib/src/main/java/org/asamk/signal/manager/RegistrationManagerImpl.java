@@ -128,7 +128,8 @@ class RegistrationManagerImpl implements RegistrationManager {
 
 		ManagerImpl m = null;
 		try {
-			account.clearAllPreKeys();
+//			account.dddUpdateIdentityKeys(account.getDDDConfigFile());
+//			account.clearAllPreKeys();
 			m = new ManagerImpl(account, pathConfig, accountFileUpdater, serviceEnvironmentConfig, userAgent);
 			account = null;
 			m.refreshPreKeys();

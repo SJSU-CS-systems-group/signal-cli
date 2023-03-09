@@ -67,6 +67,7 @@ public class ReceiveMessageHandler implements Manager.ReceiveMessageHandler {
 
         if (envelope.data().isPresent()) {
             var message = envelope.data().get();
+            System.out.println("DDD: Envolope Data: " + message);
             printDataMessage(writer, message);
         }
         if (envelope.story().isPresent()) {
