@@ -8,7 +8,7 @@ public class CreateKeys {
 
 		DDDKeys dddKeys = new DDDKeys();
 		dddKeys.generatePublicKeysJsonFile("/Users/spartan/Documents/DDD/keys/publickeys.json");
-		dddKeys.generatePublicKeysJsonFile("/Users/spartan/Documents/DDD/keys/privatekeys.json");
+		dddKeys.generatePrivateKeysJsonFile("/Users/spartan/Documents/DDD/keys/privatekeys.json");
 		System.out.println("DONE");
 
 	}
