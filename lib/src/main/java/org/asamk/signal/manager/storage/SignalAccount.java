@@ -165,6 +165,7 @@ public class SignalAccount implements Closeable {
 	private AccountDatabase accountDatabase;
 	private boolean isDisconnected;
 	private String dddConfigFile;
+	private File dddAccountPath;
 
 	private SignalAccount(final FileChannel fileChannel, final FileLock lock) {
 		this.fileChannel = fileChannel;
@@ -382,6 +383,10 @@ public class SignalAccount implements Closeable {
 
 	private static File getMessageCachePath(File dataPath, String account) {
 		return new File(getUserPath(dataPath, account), "msg-cache");
+	}
+
+	private static File getDDDPath(File dataPath, String account) {
+		return new File(getUserPath(dataPath, account), "ddd");
 	}
 
 	private static File getGroupCachePath(File dataPath, String account) {
@@ -1151,6 +1156,12 @@ public class SignalAccount implements Closeable {
 				() -> messageCache = new MessageCache(getMessageCachePath(dataPath, accountPath)));
 	}
 
+	public File getDDDAccountPath() {
+		return getOrCreate(() -> dddAccountPath, () -> {
+			dddAccountPath = getDDDPath(dataPath, accountPath);
+		});
+	}
+
 	public AccountDatabase getAccountDatabase() {
 		return getOrCreate(() -> accountDatabase, () -> {
 			try {
@@ -1548,7 +1559,7 @@ public class SignalAccount implements Closeable {
 							.decode(rootNode.get("pniIdentityPrivateKey").asText());
 					this.pniIdentityKeyPair = KeyUtils.getIdentityKeyPair(publicKeyBytes, privateKeyBytes);
 				}
-				
+
 				// offsets
 				if (rootNode.hasNonNull("preKeyIdOffset")) {
 					aciPreKeyIdOffset = rootNode.get("preKeyIdOffset").asInt();

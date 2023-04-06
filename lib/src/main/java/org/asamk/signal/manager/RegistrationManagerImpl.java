@@ -106,7 +106,7 @@ class RegistrationManagerImpl implements RegistrationManager {
 		if (dddConfig != null)
 			account.dddUpdateIdentityKeys(dddConfig);
 		NumberVerificationUtils.requestVerificationCode(accountManager, captcha, voiceVerification);
-
+		
 	}
 
 	@Override
@@ -128,12 +128,12 @@ class RegistrationManagerImpl implements RegistrationManager {
 
 		ManagerImpl m = null;
 		try {
-//			account.dddUpdateIdentityKeys(account.getDDDConfigFile());
-//			account.clearAllPreKeys();
+			account.dddUpdateIdentityKeys(account.getDDDConfigFile());
+			account.clearAllPreKeys();
 			m = new ManagerImpl(account, pathConfig, accountFileUpdater, serviceEnvironmentConfig, userAgent);
 			account = null;
 			m.refreshPreKeys();
-
+			m.findAvailableContacts();
 			if (response.isStorageCapable()) {
 				m.retrieveRemoteStorage();
 			}

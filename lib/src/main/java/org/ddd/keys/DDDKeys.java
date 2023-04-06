@@ -35,7 +35,7 @@ public class DDDKeys {
 	private SignedPreKeyRecord pniSignedPreKey;
 	private List<PreKeyRecord> preKeys;
 	private List<PreKeyRecord> pniPreKeys;
-	
+
 	// random private keys
 	private IdentityKeyPair randomIdentityKey;
 	private ECKeyPair randomECKey;
@@ -73,12 +73,9 @@ public class DDDKeys {
 		// storing random private keys as private keys will remain on the client
 		rootNode.put("identityPrivateKey", bytesToString(this.randomIdentityKey.getPrivateKey().serialize()));
 		rootNode.put("pniIdentityPrivateKey", bytesToString(this.randomIdentityKey.getPrivateKey().serialize()));
-		rootNode.put("aciSignedPreKeyPrivateKey",
-				bytesToString(this.randomIdentityKey.getPrivateKey().serialize()));
-		rootNode.put("pniSignedPreKeyPrivateKey",
-				bytesToString(this.randomIdentityKey.getPrivateKey().serialize()));
+		rootNode.put("aciSignedPreKeyPrivateKey", bytesToString(this.randomIdentityKey.getPrivateKey().serialize()));
+		rootNode.put("pniSignedPreKeyPrivateKey", bytesToString(this.randomIdentityKey.getPrivateKey().serialize()));
 
-		
 		// aci signed prekey
 		rootNode.put("aciSignedPreKeyId", this.aciSignedPreKey.getId());
 		rootNode.put("aciSignedPreKeySignature", bytesToString(this.aciSignedPreKey.getSignature()));
@@ -112,6 +109,12 @@ public class DDDKeys {
 			arrayNode.add(preKeyNode);
 		}
 		rootNode.putIfAbsent("pniPreKeys", arrayNode);
+
+		// contacts
+		arrayNode = mapper.createArrayNode();
+		arrayNode.add("+16692478573");
+		arrayNode.add("+19999999999");
+		rootNode.putIfAbsent("contacts", arrayNode);
 		mapper.writerWithDefaultPrettyPrinter().writeValue(new File(fileName), rootNode);
 
 	}

@@ -144,6 +144,8 @@ public final class IncomingMessageHandler {
                 final var sender = account.getRecipientResolver().resolveRecipient(e.getSender());
                 if (context.getContactHelper().isContactBlocked(sender)) {
                     logger.debug("Received invalid message from blocked contact, ignoring.");
+                } else if (account.isDisconnected()) {
+                	System.out.println("Ignoring message as message received on disconnected account");
                 } else {
                     final var senderProfile = context.getProfileHelper().getRecipientProfile(sender);
                     final var selfProfile = context.getProfileHelper().getSelfProfile();

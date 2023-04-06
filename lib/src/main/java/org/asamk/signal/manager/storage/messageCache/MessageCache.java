@@ -105,7 +105,9 @@ public class MessageCache {
     }
 
     private File getMessageCacheFile(RecipientId recipientId, long now, long timestamp) throws IOException {
-        var cachePath = getMessageCachePath(recipientId);
+        System.out.println("reached getMessageCacheFile()");
+        logger.info("reached getMessageCacheFile()");
+    	var cachePath = getMessageCachePath(recipientId);
         IOUtils.createPrivateDirectories(cachePath);
         return new File(cachePath, now + "_" + timestamp);
     }
