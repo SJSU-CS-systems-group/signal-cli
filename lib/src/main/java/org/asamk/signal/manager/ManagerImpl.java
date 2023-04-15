@@ -366,8 +366,6 @@ class ManagerImpl implements Manager {
 				e.printStackTrace();
 			}
 			if (response != null) {
-				// see if file exists.. create if file doesnt exist.. read existing file..
-				// append entries to the file
 				File dddAccount = account.getDDDAccountPath();
 				ObjectNode rootNode = mapper.createObjectNode();
 				ArrayNode contacts = mapper.createArrayNode();
@@ -375,10 +373,17 @@ class ManagerImpl implements Manager {
 					ObjectNode contactNode = mapper.createObjectNode();
 					contactNode.put("number", entry.getKey());
 					contactNode.put("aci", entry.getValue().aci().get().toByteArray().toString());
-					contactNode.put("pni", entry.getValue().aci().get().toByteArray().toString());
+					contactNode.put("pni", entry.getValue().pni().get().toByteArray().toString());
 					contacts.add(contactNode);
 				}
+				rootNode.put("e164", this.context.getAccount().getNumber());
+				rootNode.put("aci", this.context.getAccount().getAci().toString());
+				rootNode.put("pni", this.context.getAccount().getPni().toString());
+				
 				rootNode.putIfAbsent("contacts", contacts);
+				System.out.println(rootNode.toPrettyString());
+				
+				mapper.writerWithDefaultPrettyPrinter().writeValue(dddAccount, rootNode);
 			}
 		}
 
