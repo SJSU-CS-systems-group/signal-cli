@@ -355,6 +355,7 @@ class ManagerImpl implements Manager {
 				if (rootNode.hasNonNull("contacts") && rootNode.get("contacts").size() > 0) {
 					JsonNode contacts = rootNode.get("contacts");
 					for (int i = 0; i < contacts.size(); i++) {
+						String contact = contacts.get(i).asText();
 						numbers.add(contacts.get(i).asText());
 					}
 				}
@@ -381,9 +382,10 @@ class ManagerImpl implements Manager {
 				rootNode.put("pni", this.context.getAccount().getPni().toString());
 				
 				rootNode.putIfAbsent("contacts", contacts);
-				System.out.println(rootNode.toPrettyString());
+//				System.out.println(rootNode.toPrettyString());
 				
 				mapper.writerWithDefaultPrettyPrinter().writeValue(dddAccount, rootNode);
+				System.out.println(dddAccount.getAbsolutePath());
 			}
 		}
 

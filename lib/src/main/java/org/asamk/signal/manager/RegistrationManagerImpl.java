@@ -106,37 +106,37 @@ class RegistrationManagerImpl implements RegistrationManager {
 		if (dddConfig != null)
 			account.dddUpdateIdentityKeys(dddConfig);
 		NumberVerificationUtils.requestVerificationCode(accountManager, captcha, voiceVerification);
-		
+
 	}
 
 	@Override
 	public void verifyAccount(String verificationCode, String pin)
 			throws IOException, PinLockedException, IncorrectPinException {
-//		final var result = NumberVerificationUtils.verifyNumber(verificationCode, pin, pinHelper,
-//				this::verifyAccountWithCode);
-//		final var response = result.first();
-//		final var masterKey = result.second();
-//		if (masterKey == null) {
-//			pin = null;
-//		}
-//
-//		// accountManager.setGcmId(Optional.of(GoogleCloudMessaging.getInstance(this).register(REGISTRATION_ID)));
-//		final var aci = ACI.parseOrNull(response.getUuid());
-//		final var pni = PNI.parseOrNull(response.getPni());
-//		account.finishRegistration(aci, pni, masterKey, pin);
-//		accountFileUpdater.updateAccountIdentifiers(account.getNumber(), aci);
+		final var result = NumberVerificationUtils.verifyNumber(verificationCode, pin, pinHelper,
+				this::verifyAccountWithCode);
+		final var response = result.first();
+		final var masterKey = result.second();
+		if (masterKey == null) {
+			pin = null;
+		}
+
+		// accountManager.setGcmId(Optional.of(GoogleCloudMessaging.getInstance(this).register(REGISTRATION_ID)));
+		final var aci = ACI.parseOrNull(response.getUuid());
+		final var pni = PNI.parseOrNull(response.getPni());
+		account.finishRegistration(aci, pni, masterKey, pin);
+		accountFileUpdater.updateAccountIdentifiers(account.getNumber(), aci);
 
 		ManagerImpl m = null;
 		try {
-//			account.dddUpdateIdentityKeys(account.getDDDConfigFile());
-//			account.clearAllPreKeys();
+			account.dddUpdateIdentityKeys(account.getDDDConfigFile());
+			account.clearAllPreKeys();
 			m = new ManagerImpl(account, pathConfig, accountFileUpdater, serviceEnvironmentConfig, userAgent);
 			account = null;
-//			m.refreshPreKeys();
+			m.refreshPreKeys();
 			m.findAvailableContacts();
-//			if (response.isStorageCapable()) {
-//				m.retrieveRemoteStorage();
-//			}
+			if (response.isStorageCapable()) {
+				m.retrieveRemoteStorage();
+			}
 			// Set an initial empty profile so user can be added to groups
 			try {
 				m.updateProfile(UpdateProfile.newBuilder().build());

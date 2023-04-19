@@ -124,7 +124,9 @@ public class ReceiveHelper {
 
 		while (!shouldStop && remainingMessages != 0) {
 			if (needsToRetryFailedMessages) {
-				retryFailedReceivedMessages(handler);
+
+				if (!account.isDisconnected())
+					retryFailedReceivedMessages(handler);
 				needsToRetryFailedMessages = false;
 			}
 			SignalServiceEnvelope envelope;
@@ -142,7 +144,6 @@ public class ReceiveHelper {
 							? account.getRecipientResolver().resolveRecipient(envelope1.getSourceAddress())
 							: null;
 					logger.trace("Storing new message from {}", recipientId);
-					System.out.println("DDD received from: " + recipientId);
 					// store message on disk, before acknowledging receipt to the server
 					cachedMessage[0] = account.getMessageCache().cacheMessage(envelope1, recipientId);
 				});

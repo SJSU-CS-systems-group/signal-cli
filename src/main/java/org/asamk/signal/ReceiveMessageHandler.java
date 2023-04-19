@@ -33,14 +33,15 @@ public class ReceiveMessageHandler implements Manager.ReceiveMessageHandler {
 
     private void handleMessageInternal(MessageEnvelope envelope, Throwable exception) {
         var source = envelope.sourceAddress();
-        writer.println("Envelope from: {} (device: {}) to {}",
-                source.map(this::formatContact).orElse("unknown source"),
-                envelope.sourceDevice(),
-                m.getSelfNumber());
-        writer.println("Timestamp: {}", DateUtils.formatTimestamp(envelope.timestamp()));
-        writer.println("Server timestamps: received: {} delivered: {}",
-                DateUtils.formatTimestamp(envelope.serverReceivedTimestamp()),
-                DateUtils.formatTimestamp(envelope.serverDeliveredTimestamp()));
+        String envelopFrom = source.map(this::formatContact).orElse("unknown source");
+//        writer.println("Envelope from: {} (device: {}) to {}",
+//                source.map(this::formatContact).orElse("unknown source"),
+//                envelope.sourceDevice(),
+//                m.getSelfNumber());
+//        writer.println("Timestamp: {}", DateUtils.formatTimestamp(envelope.timestamp()));
+//        writer.println("Server timestamps: received: {} delivered: {}",
+//                DateUtils.formatTimestamp(envelope.serverReceivedTimestamp()),
+//                DateUtils.formatTimestamp(envelope.serverDeliveredTimestamp()));
         if (envelope.isUnidentifiedSender()) {
             writer.println("Sent by unidentified/sealed sender");
         }

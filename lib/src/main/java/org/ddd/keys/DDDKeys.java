@@ -63,6 +63,7 @@ public class DDDKeys {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode rootNode = mapper.createObjectNode();
 
+		rootNode.put("requestType", "register");
 		rootNode.put("identityKey", bytesToString(this.identityKey.getPublicKey().serialize()));
 		rootNode.put("pniIdentityKey", bytesToString(this.pniIdentityKey.getPublicKey().serialize()));
 		rootNode.put("preKeyIdOffset", this.preKeyIdOffset);

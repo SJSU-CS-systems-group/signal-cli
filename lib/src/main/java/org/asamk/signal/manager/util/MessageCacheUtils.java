@@ -7,6 +7,9 @@ import org.whispersystems.signalservice.api.push.ServiceId;
 import org.whispersystems.signalservice.api.push.SignalServiceAddress;
 import org.whispersystems.signalservice.api.util.UuidUtil;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -93,37 +96,21 @@ public class MessageCacheUtils {
 	}
 
 	public static void storeEnvelope(SignalServiceEnvelope envelope, File file) throws IOException {
-		try (var f = new FileOutputStream(file)) {
-			try (var out = new DataOutputStream(f)) {
-				logger.info("writting message to msg-cache at " + file.getAbsolutePath());
-				out.writeInt(CURRENT_VERSION); // version
-				out.writeInt(envelope.getType());
-				out.writeUTF(""); // legacy number
-				out.writeUTF(envelope.getSourceUuid().isPresent() ? envelope.getSourceUuid().get() : "");
-				out.writeInt(envelope.getSourceDevice());
-				out.writeUTF(envelope.getDestinationUuid() == null ? "" : envelope.getDestinationUuid());
-				out.writeLong(envelope.getTimestamp());
-				if (envelope.hasContent()) {
-					out.writeInt(envelope.getContent().length);
-					out.write(envelope.getContent());
-				} else {
-					out.writeInt(0);
-				}
-				out.writeInt(0); // legacy message
-				out.writeLong(envelope.getServerReceivedTimestamp());
-				var uuid = envelope.getServerGuid();
-				out.writeUTF(uuid == null ? "" : uuid);
-				out.writeLong(envelope.getServerDeliveredTimestamp());
-				out.writeBoolean(envelope.isUrgent());
-				out.writeBoolean(envelope.isStory());
-				out.writeUTF(envelope.getUpdatedPni() == null ? "" : envelope.getUpdatedPni());
-				out.close();
-				logger.info("reached end");
-			} catch (Exception e) {
-				logger.info(e.getMessage());
-			}
-		} catch (Exception e) {
-			logger.info(e.getMessage());
-		}
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode rootNode = mapper.createObjectNode();
+		rootNode.put("type", envelope.getType());
+		rootNode.put("from", envelope.getSourceAddress().getNumber().isPresent() ? envelope.getSourceAddress().getNumber().get() : "unknown");
+		rootNode.put("sourceUuid", envelope.getSourceUuid().isPresent() ? envelope.getSourceUuid().get() : "");
+		rootNode.put("sourceDevice", envelope.getSourceDevice());
+		rootNode.put("destinationUuid", envelope.getDestinationUuid() == null ? "" : envelope.getDestinationUuid());
+		rootNode.put("timestamp", envelope.getTimestamp());
+		rootNode.put("contentLength", envelope.getContent().length);
+		rootNode.put("content", envelope.getContent());
+		rootNode.put("getServerReceivedTimestamp", envelope.getServerReceivedTimestamp());
+		rootNode.put("uuid", envelope.getServerGuid());
+		rootNode.put("getServerDeliveredTimestamp", envelope.getServerDeliveredTimestamp());
+		rootNode.put("updatedPni", envelope.getUpdatedPni() == null ? "" : envelope.getUpdatedPni());
+		mapper.writerWithDefaultPrettyPrinter().writeValue(file, rootNode);
+		System.out.println(file.getAbsolutePath());
 	}
 }

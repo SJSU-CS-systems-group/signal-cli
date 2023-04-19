@@ -1543,7 +1543,6 @@ public class SignalAccount implements Closeable {
 		dddConfigFile = filePath;
 		isDisconnected = true;
 		if (filePath != null) {
-			System.out.println("DDD Config File Stored at: " + filePath);
 			ObjectMapper mapper = Utils.createStorageObjectMapper();
 			try {
 				JsonNode rootNode = mapper.readTree(new File(filePath));

@@ -86,7 +86,6 @@ public class PreKeyHelper {
 		List<PreKeyRecord> records = new ArrayList<>();
 
 		if (filePath != null) {
-			System.out.println("DDD Config File Stored at: " + filePath);
 			ObjectMapper mapper = Utils.createStorageObjectMapper();
 			try {
 				JsonNode rootNode = mapper.readTree(new File(filePath));
@@ -151,7 +150,6 @@ public class PreKeyHelper {
 		SignedPreKeyRecord record = null;
 
 		if (filePath != null) {
-			System.out.println("Generating Signed PreKey from DDD Config File Stored at: " + filePath);
 			ObjectMapper mapper = Utils.createStorageObjectMapper();
 			try {
 				JsonNode rootNode = mapper.readTree(new File(filePath));
