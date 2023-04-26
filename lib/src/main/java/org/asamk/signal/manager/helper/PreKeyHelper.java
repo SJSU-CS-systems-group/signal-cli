@@ -98,8 +98,11 @@ public class PreKeyHelper {
 						JsonNode prekey = rootNode.get(preKeysKey).get(i);
 						int id = prekey.get("preKeyId").asInt();
 						final var publicKeyBytes = Base64.getDecoder().decode(prekey.get("preKeyPublicKey").asText());
-						final var privateKeyBytes = Base64.getDecoder()
-								.decode(prekey.get("preKeyPrivateKey").asText());
+
+						// adding random bytes as private key, the private part is not uploaded to
+						// signal server.. need it to call next function
+						final var privateKeyBytes = account.getAciIdentityKeyPair().getPrivateKey().serialize();
+//						final var privateKeyBytes = Base64.getDecoder().decode(prekey.get("preKeyPrivateKey").asText());
 
 						final var publicKey = Curve.decodePoint(publicKeyBytes, 0);
 						final var privateKey = Curve.decodePrivatePoint(privateKeyBytes);
@@ -159,8 +162,12 @@ public class PreKeyHelper {
 							&& rootNode.hasNonNull("pniSignedPreKeyPublicKey")) {
 						final var publicKeyBytes = Base64.getDecoder()
 								.decode(rootNode.get("pniSignedPreKeyPublicKey").asText());
-						final var privateKeyBytes = Base64.getDecoder()
-								.decode(rootNode.get("pniSignedPreKeyPrivateKey").asText());
+						
+						// storing random temporary private key; need it to populate to call next function; doesnt get uploaded to server
+						final var privateKeyBytes = account.getAciIdentityKeyPair().getPrivateKey().serialize();
+						
+//						final var privateKeyBytes = Base64.getDecoder()
+//								.decode(rootNode.get("pniSignedPreKeyPrivateKey").asText());
 
 						final var publicKey = Curve.decodePoint(publicKeyBytes, 0);
 						final var privateKey = Curve.decodePrivatePoint(privateKeyBytes);
@@ -177,8 +184,11 @@ public class PreKeyHelper {
 							&& rootNode.hasNonNull("aciSignedPreKeyPublicKey")) {
 						final var publicKeyBytes = Base64.getDecoder()
 								.decode(rootNode.get("aciSignedPreKeyPublicKey").asText());
-						final var privateKeyBytes = Base64.getDecoder()
-								.decode(rootNode.get("aciSignedPreKeyPrivateKey").asText());
+						// storing random temporary private key; need it to populate to call next function; doesnt get uploaded to server
+						final var privateKeyBytes = account.getAciIdentityKeyPair().getPrivateKey().serialize();
+						
+//								final var privateKeyBytes = Base64.getDecoder()
+//								.decode(rootNode.get("aciSignedPreKeyPrivateKey").asText());
 
 						final var publicKey = Curve.decodePoint(publicKeyBytes, 0);
 						final var privateKey = Curve.decodePrivatePoint(privateKeyBytes);

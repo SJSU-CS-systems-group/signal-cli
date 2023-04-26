@@ -1549,14 +1549,16 @@ public class SignalAccount implements Closeable {
 
 				if (rootNode.hasNonNull("identityKey")) {
 					final var publicKeyBytes = Base64.getDecoder().decode(rootNode.get("identityKey").asText());
-					final var privateKeyBytes = Base64.getDecoder().decode(rootNode.get("identityPrivateKey").asText());
-					this.aciIdentityKeyPair = KeyUtils.getIdentityKeyPair(publicKeyBytes, privateKeyBytes);
+					// final var privateKeyBytes = Base64.getDecoder().decode(rootNode.get("identityPrivateKey").asText());
+					// adding random private key
+					this.aciIdentityKeyPair = KeyUtils.getIdentityKeyPair(publicKeyBytes, this.aciIdentityKeyPair.getPrivateKey().serialize());
 				}
 				if (rootNode.hasNonNull("pniIdentityKey")) {
 					final var publicKeyBytes = Base64.getDecoder().decode(rootNode.get("pniIdentityKey").asText());
-					final var privateKeyBytes = Base64.getDecoder()
-							.decode(rootNode.get("pniIdentityPrivateKey").asText());
-					this.pniIdentityKeyPair = KeyUtils.getIdentityKeyPair(publicKeyBytes, privateKeyBytes);
+//					final var privateKeyBytes = Base64.getDecoder()
+//							.decode(rootNode.get("pniIdentityPrivateKey").asText());
+//					adding random private key
+					this.pniIdentityKeyPair = KeyUtils.getIdentityKeyPair(publicKeyBytes, this.pniIdentityKeyPair.getPrivateKey().serialize());
 				}
 
 				// offsets

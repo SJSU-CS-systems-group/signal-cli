@@ -356,7 +356,13 @@ class ManagerImpl implements Manager {
 					JsonNode contacts = rootNode.get("contacts");
 					for (int i = 0; i < contacts.size(); i++) {
 						String contact = contacts.get(i).asText();
-						numbers.add(contacts.get(i).asText());
+						try {
+							contact = PhoneNumberFormatter.formatNumber(contact, account.getNumber());
+						} catch (InvalidNumberException e) {
+							System.out.println("DDD: Issue while formatting phone number");
+							e.printStackTrace();
+						}
+						numbers.add(contact);
 					}
 				}
 			}
@@ -380,10 +386,9 @@ class ManagerImpl implements Manager {
 				rootNode.put("e164", this.context.getAccount().getNumber());
 				rootNode.put("aci", this.context.getAccount().getAci().toString());
 				rootNode.put("pni", this.context.getAccount().getPni().toString());
-				
+
 				rootNode.putIfAbsent("contacts", contacts);
-//				System.out.println(rootNode.toPrettyString());
-				
+
 				mapper.writerWithDefaultPrettyPrinter().writeValue(dddAccount, rootNode);
 				System.out.println(dddAccount.getAbsolutePath());
 			}
